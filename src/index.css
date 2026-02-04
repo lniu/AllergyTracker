@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+  
+  /* Ensure focus rings are always visible for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+  
+  /* Skip link for keyboard navigation - positioned off-screen but with adequate touch target when focused */
+  .skip-link {
+    @apply absolute -top-full left-4 z-50 bg-white px-4 py-3 rounded-lg shadow-lg 
+           text-primary-600 font-medium min-h-[44px] min-w-[44px]
+           focus:top-4 focus:outline-none focus:ring-2 focus:ring-primary-500;
+  }
+}
+
+@layer components {
+  /* Status badge patterns for colorblind accessibility */
+  .status-pattern-testing {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 4px,
+      rgba(255, 255, 255, 0.2) 4px,
+      rgba(255, 255, 255, 0.2) 8px
+    );
+  }
+  
+  .status-pattern-reaction {
+    background-image: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.2) 1px,
+      transparent 1px
+    );
+    background-size: 6px 6px;
+  }
+  
+  /* Card hover effects */
+  .allergen-card {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  .allergen-card:hover {
+    @apply shadow-md -translate-y-0.5;
+  }
+  
+  .allergen-card:focus-within {
+    @apply ring-2 ring-primary-500 ring-offset-2;
+  }
+  
+  /* Form input styles */
+  .form-input {
+    @apply w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white
+           text-gray-900 placeholder-gray-400
+           focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20
+           disabled:bg-gray-100 disabled:cursor-not-allowed
+           transition-colors duration-200;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+  }
+  
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5
+           font-medium rounded-lg transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary-500 text-white hover:bg-primary-600 focus:ring-primary-500;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-500;
+  }
+  
+  .btn-danger {
+    @apply btn bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
+  }
+  
+  .btn-outline {
+    @apply btn border-2 border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500;
+  }
+}
+
+@layer utilities {
+  /* Accessible hiding that preserves screen reader access */
+  .visually-hidden {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+}
