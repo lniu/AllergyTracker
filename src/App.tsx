@@ -9,18 +9,29 @@ import { AddReactionPage } from './pages/AddReactionPage';
 import { ExportPage } from './pages/ExportPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { BabyActivityPage } from './pages/BabyActivityPage';
-import { seedAllergens } from './lib/instant';
+import { db, seedAllergens } from './lib/instant';
 
 function App() {
   const seeded = useRef(false);
 
   // Seed allergens on first load
   useEffect(() => {
-    if (!seeded.current) {
+    if (!seeded.current && db) {
       seeded.current = true;
       seedAllergens().catch(console.error);
     }
   }, []);
+
+  if (!db) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' }}>
+        <h1>Configuration Error</h1>
+        <p>
+          InstantDB is not configured. Please set the <code>VITE_INSTANT_APP_ID</code> environment variable.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <ErrorBoundary>

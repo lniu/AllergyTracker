@@ -20,8 +20,9 @@ function getTodayStart(): string {
 }
 
 // Custom hook that uses InstantDB for real-time data
+// db is guaranteed non-null here because App.tsx guards against it
 export function useBabyActivityStore() {
-  const { data, isLoading, error } = db.useQuery({
+  const { data, isLoading, error } = db!.useQuery({
     babyActivities: {},
   });
 
@@ -47,8 +48,8 @@ export function useBabyActivityStore() {
   // Activity actions
   const addActivity = async (activity: Omit<BabyActivity, 'id'> & { id?: string }) => {
     const activityId = activity.id || id();
-    await db.transact(
-      db.tx.babyActivities[activityId].update({
+    await db!.transact(
+      db!.tx.babyActivities[activityId].update({
         type: activity.type,
         timestamp: activity.timestamp,
         notes: activity.notes,
@@ -61,8 +62,8 @@ export function useBabyActivityStore() {
   };
 
   const updateActivity = async (activity: BabyActivity) => {
-    await db.transact(
-      db.tx.babyActivities[activity.id].update({
+    await db!.transact(
+      db!.tx.babyActivities[activity.id].update({
         type: activity.type,
         timestamp: activity.timestamp,
         notes: activity.notes,
@@ -75,7 +76,7 @@ export function useBabyActivityStore() {
   };
 
   const deleteActivity = async (activityId: string) => {
-    await db.transact(db.tx.babyActivities[activityId].delete());
+    await db!.transact(db!.tx.babyActivities[activityId].delete());
   };
 
   // Computed helpers

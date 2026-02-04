@@ -2,8 +2,9 @@ import { db, id, seedAllergens } from '../lib/instant';
 import type { Allergen, FoodTrial, Reaction, AllergenStatus } from '../types';
 
 // Custom hook that uses InstantDB for real-time data
+// db is guaranteed non-null here because App.tsx guards against it
 export function useAllergyStore() {
-  const { data, isLoading, error } = db.useQuery({
+  const { data, isLoading, error } = db!.useQuery({
     allergens: {},
     foodTrials: {},
     reactions: {},
@@ -46,8 +47,8 @@ export function useAllergyStore() {
 
   // Allergen actions
   const addAllergen = async (allergen: Allergen) => {
-    await db.transact(
-      db.tx.allergens[allergen.id].update({
+    await db!.transact(
+      db!.tx.allergens[allergen.id].update({
         name: allergen.name,
         isCustom: allergen.isCustom,
         icon: allergen.icon,
@@ -57,14 +58,14 @@ export function useAllergyStore() {
   };
 
   const deleteAllergen = async (allergenId: string) => {
-    await db.transact(db.tx.allergens[allergenId].delete());
+    await db!.transact(db!.tx.allergens[allergenId].delete());
   };
 
   // Food trial actions
   const addFoodTrial = async (trial: Omit<FoodTrial, 'id'> & { id?: string }) => {
     const trialId = trial.id || id();
-    await db.transact(
-      db.tx.foodTrials[trialId].update({
+    await db!.transact(
+      db!.tx.foodTrials[trialId].update({
         foodName: trial.foodName,
         allergenIds: trial.allergenIds,
         date: trial.date,
@@ -76,8 +77,8 @@ export function useAllergyStore() {
   };
 
   const updateFoodTrial = async (trial: FoodTrial) => {
-    await db.transact(
-      db.tx.foodTrials[trial.id].update({
+    await db!.transact(
+      db!.tx.foodTrials[trial.id].update({
         foodName: trial.foodName,
         allergenIds: trial.allergenIds,
         date: trial.date,
@@ -89,14 +90,14 @@ export function useAllergyStore() {
   };
 
   const deleteFoodTrial = async (trialId: string) => {
-    await db.transact(db.tx.foodTrials[trialId].delete());
+    await db!.transact(db!.tx.foodTrials[trialId].delete());
   };
 
   // Reaction actions
   const addReaction = async (reaction: Omit<Reaction, 'id'> & { id?: string }) => {
     const reactionId = reaction.id || id();
-    await db.transact(
-      db.tx.reactions[reactionId].update({
+    await db!.transact(
+      db!.tx.reactions[reactionId].update({
         foodTrialId: reaction.foodTrialId,
         symptoms: reaction.symptoms,
         severity: reaction.severity,
@@ -109,8 +110,8 @@ export function useAllergyStore() {
   };
 
   const updateReaction = async (reaction: Reaction) => {
-    await db.transact(
-      db.tx.reactions[reaction.id].update({
+    await db!.transact(
+      db!.tx.reactions[reaction.id].update({
         foodTrialId: reaction.foodTrialId,
         symptoms: reaction.symptoms,
         severity: reaction.severity,
@@ -123,7 +124,7 @@ export function useAllergyStore() {
   };
 
   const deleteReaction = async (reactionId: string) => {
-    await db.transact(db.tx.reactions[reactionId].delete());
+    await db!.transact(db!.tx.reactions[reactionId].delete());
   };
 
   // Computed functions
