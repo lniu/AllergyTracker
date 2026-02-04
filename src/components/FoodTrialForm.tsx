@@ -92,6 +92,15 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
     return subItems.filter(sub => selectedAllergens.includes(sub.id)).length;
   }, [getSubItems, selectedAllergens]);
 
+  const getAllergenLabel = (allergen: { id: string; parentId?: string; name: string }) => {
+    const key = allergen.id.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+    const translationKey = allergen.parentId
+      ? `allergens.subItems.${key}`
+      : `allergens.${key}`;
+    const translated = t(translationKey);
+    return translated === translationKey ? allergen.name : translated;
+  };
+
   const parentAllergens = getParentAllergens();
 
   if (isLoading) {
@@ -171,7 +180,7 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                   )}
                   <span id={`allergen-${parent.id}-label`} className="flex items-center gap-2 flex-1">
                     {parent.icon && <span aria-hidden="true">{parent.icon}</span>}
-                    <span className="text-sm font-medium">{parent.name}</span>
+                    <span className="text-sm font-medium">{getAllergenLabel(parent)}</span>
                     {hasSubItems && selectedSubCount > 0 && (
                       <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full">
                         {selectedSubCount} {t('trial.selected')}
@@ -206,7 +215,7 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                             checked={selectedAllergens.includes(subItem.id)}
                             onCheckedChange={() => handleAllergenToggle(subItem.id)}
                           />
-                          <span className="text-sm truncate">{subItem.name}</span>
+                          <span className="text-sm truncate">{getAllergenLabel(subItem)}</span>
                         </div>
                       ))}
                     </div>
@@ -234,7 +243,7 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                   className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
                 >
                   {parent && <span className="text-primary-500">{parent.icon}</span>}
-                  {allergen.name}
+                  {getAllergenLabel(allergen)}
                   <button
                     type="button"
                     onClick={() => handleAllergenToggle(id)}
