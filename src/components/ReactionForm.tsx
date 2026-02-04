@@ -135,13 +135,17 @@ export function ReactionForm({ foodTrialId, onSuccess }: ReactionFormProps) {
               </h4>
               <div className="flex flex-wrap gap-2">
                 {SYMPTOM_CATEGORIES[category].map((symptom) => (
-                  <label
+                  <div
                     key={symptom}
                     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border cursor-pointer transition-colors ${
                       symptoms.includes(symptom)
                         ? 'border-status-reaction bg-status-reaction-light text-gray-900'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
+                    onClick={(e) => {
+                      if ((e.target as HTMLElement).closest('button')) return;
+                      handleSymptomToggle(symptom);
+                    }}
                   >
                     <Checkbox
                       checked={symptoms.includes(symptom)}
@@ -149,7 +153,7 @@ export function ReactionForm({ foodTrialId, onSuccess }: ReactionFormProps) {
                       className="sr-only"
                     />
                     <span className="text-sm">{symptom}</span>
-                  </label>
+                  </div>
                 ))}
               </div>
             </div>

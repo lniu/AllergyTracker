@@ -1,5 +1,6 @@
 import { db, id, seedAllergens } from '../lib/instant';
 import type { Allergen, FoodTrial, Reaction, AllergenStatus } from '../types';
+import { BIG_9_ALLERGENS, ALLERGEN_SUB_ITEMS } from '../types';
 
 // Custom hook that uses InstantDB for real-time data
 // db is guaranteed non-null here because App.tsx guards against it
@@ -169,11 +170,25 @@ export function useAllergyStore() {
 
   // Hierarchy helpers
   const getParentAllergens = () => {
-    return allergens.filter((a) => !a.parentId);
+    const parents = allergens.filter((a) => !a.parentId);
+    if (parents.length === 0 && !isLoading) {
+      return BIG_9_ALLERGENS;
+    }
+    return parents;
   };
 
   const getSubItems = (parentId: string) => {
-    return allergens.filter((a) => a.parentId === parentId);
+    const subs = allergens.filter((a) => a.parentId === parentId);
+    if (subs.length === 0 && !isLoading && ALLERGEN_SUB_ITEMS[parentId]) {
+      return ALLERGEN_SUB_ITEMS[parentId].map((sub) => ({
+        id: sub.id,
+        name: sub.name,
+        isCustom: false,
+        icon: sub.icon,
+        parentId,
+      }));
+    }
+    return subs;
   };
 
   const getParentStatus = (parentId: string): AllergenStatus => {
@@ -215,6 +230,14 @@ export function useAllergyStore() {
     const subItem = allergens.find((a) => a.id === subItemId);
     if (subItem?.parentId) {
       return allergens.find((a) => a.id === subItem.parentId);
+    }
+    // Fallback: check static sub-items
+    if (!isLoading) {
+      for (const [parentId, subs] of Object.entries(ALLERGEN_SUB_ITEMS)) {
+        if (subs.some((s) => s.id === subItemId)) {
+          return BIG_9_ALLERGENS.find((a) => a.id === parentId);
+        }
+      }
     }
     return undefined;
   };

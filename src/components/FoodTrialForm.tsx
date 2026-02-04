@@ -15,7 +15,7 @@ interface FoodTrialFormProps {
 export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFormProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { allergens, addFoodTrial, getParentAllergens, getSubItems, getParentForSubItem } = useAllergyStore();
+  const { allergens, addFoodTrial, getParentAllergens, getSubItems, getParentForSubItem, isLoading } = useAllergyStore();
   
   const [foodName, setFoodName] = useState('');
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>(
@@ -41,8 +41,6 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const parentAllergens = getParentAllergens();
-
   const handleAllergenToggle = useCallback((allergenId: string) => {
     setSelectedAllergens((prev) =>
       prev.includes(allergenId)
@@ -65,7 +63,7 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
 
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       const trial: FoodTrial = {
         id: crypto.randomUUID(),
@@ -93,6 +91,21 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
     const subItems = getSubItems(parentId);
     return subItems.filter(sub => selectedAllergens.includes(sub.id)).length;
   }, [getSubItems, selectedAllergens]);
+
+  const parentAllergens = getParentAllergens();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 animate-pulse" aria-busy="true">
+        <div className="h-10 bg-gray-100 rounded-lg" />
+        <div className="space-y-2">
+          {[...Array(9)].map((_, i) => (
+            <div key={i} className="h-12 bg-gray-100 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -177,26 +190,24 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                   <div className="border-t bg-gray-50">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3">
                       {subItems.map((subItem) => (
-                        <label
+                        <div
                           key={subItem.id}
                           className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
                             selectedAllergens.includes(subItem.id)
                               ? 'bg-primary-100 border border-primary-300'
                               : 'bg-white border border-gray-200 hover:border-gray-300'
                           }`}
+                          onClick={(e) => {
+                            if ((e.target as HTMLElement).closest('button')) return;
+                            handleAllergenToggle(subItem.id);
+                          }}
                         >
                           <Checkbox
                             checked={selectedAllergens.includes(subItem.id)}
                             onCheckedChange={() => handleAllergenToggle(subItem.id)}
-                            aria-describedby={`allergen-${subItem.id}-label`}
                           />
-                          <span 
-                            id={`allergen-${subItem.id}-label`} 
-                            className="text-sm truncate"
-                          >
-                            {subItem.name}
-                          </span>
-                        </label>
+                          <span className="text-sm truncate">{subItem.name}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
