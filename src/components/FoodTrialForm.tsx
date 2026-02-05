@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Button } from './ui/Button';
 import { Checkbox } from './ui/Checkbox';
 import { useAllergyStore } from '../stores/allergyStore';
-import type { FoodTrial } from '../types';
+import type { FoodTrial, Allergen } from '../types';
+import { BIG_9_ALLERGENS, ALLERGEN_SUB_ITEMS } from '../types';
 
 interface FoodTrialFormProps {
   onSuccess?: () => void;
@@ -99,6 +100,33 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
       : `allergens.${key}`;
     const translated = t(translationKey);
     return translated === translationKey ? allergen.name : translated;
+  };
+
+  // Find allergen by ID from database or static constants (fallback)
+  const findAllergenById = (id: string): Allergen | undefined => {
+    // First check database allergens
+    const fromDb = allergens.find(a => a.id === id);
+    if (fromDb) return fromDb;
+
+    // Check static parent allergens
+    const fromParents = BIG_9_ALLERGENS.find(a => a.id === id);
+    if (fromParents) return fromParents;
+
+    // Check static sub-items
+    for (const [parentId, subs] of Object.entries(ALLERGEN_SUB_ITEMS)) {
+      const subItem = subs.find(s => s.id === id);
+      if (subItem) {
+        return {
+          id: subItem.id,
+          name: subItem.name,
+          isCustom: false,
+          icon: subItem.icon,
+          parentId,
+        };
+      }
+    }
+
+    return undefined;
   };
 
   const parentAllergens = getParentAllergens();
@@ -233,17 +261,16 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
         {selectedAllergens.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="text-sm text-gray-600">{t('foodTrialForm.selectedLabel')}</span>
-            {selectedAllergens.map((id) => {
-              const allergen = allergens.find(a => a.id === id);
-              const parent = getParentForSubItem(id);
-              if (!allergen) return null;
-              return (
+            {selectedAllergens
+              .map(id => ({ id, allergen: findAllergenById(id), parent: getParentForSubItem(id) }))
+              .filter(item => item.allergen !== undefined)
+              .map(({ id, allergen, parent }) => (
                 <span
                   key={id}
                   className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
                 >
                   {parent && <span className="text-primary-500">{parent.icon}</span>}
-                  {getAllergenLabel(allergen)}
+                  {getAllergenLabel(allergen!)}
                   <button
                     type="button"
                     onClick={() => handleAllergenToggle(id)}
@@ -252,8 +279,7 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                     &times;
                   </button>
                 </span>
-              );
-            })}
+              ))}
           </div>
         )}
       </fieldset>
