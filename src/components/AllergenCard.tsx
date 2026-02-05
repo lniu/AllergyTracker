@@ -31,7 +31,8 @@ export function AllergenCard({ allergen }: AllergenCardProps) {
       status: hasItems ? getParentStatus(allergen.id) : getAllergenStatus(allergen.id),
       trialCount: hasItems ? getParentTrialCount(allergen.id) : getTrialCount(allergen.id),
     };
-  }, [allergen.id, getSubItems, getParentStatus, getAllergenStatus, getParentTrialCount, getTrialCount]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allergen.id]);
 
   const bgColors = {
     safe: 'bg-status-safe-light border-status-safe/20',
@@ -67,7 +68,7 @@ export function AllergenCard({ allergen }: AllergenCardProps) {
       >
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3">
-            {allergen.icon && (
+            {allergen.icon && typeof allergen.icon === 'string' && (
               <span className="text-3xl" role="img" aria-hidden="true">
                 {allergen.icon}
               </span>

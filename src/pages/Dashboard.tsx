@@ -80,7 +80,7 @@ export function Dashboard() {
                       <AlertTriangle className="h-5 w-5 text-status-reaction" aria-hidden="true" />
                     ) : (
                       <span className="text-xl">
-                        {trialAllergens[0]?.icon || '🍽️'}
+                        {(trialAllergens[0]?.icon && typeof trialAllergens[0].icon === 'string') ? trialAllergens[0].icon : '🍽️'}
                       </span>
                     )}
                   </div>

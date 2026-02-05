@@ -85,13 +85,13 @@ export function AllergenDetail() {
               to={`/allergen/${parentAllergen.id}`}
               className="text-sm text-gray-500 hover:text-primary-500 flex items-center gap-1 mb-1"
             >
-              {parentAllergen.icon && <span>{parentAllergen.icon}</span>}
+              {parentAllergen.icon && typeof parentAllergen.icon === 'string' && <span>{parentAllergen.icon}</span>}
               {parentAllergen.name}
               <ChevronRight className="w-3 h-3" />
             </Link>
           )}
           <div className="flex items-center gap-3">
-            {allergen.icon && (
+            {allergen.icon && typeof allergen.icon === 'string' && (
               <span className="text-4xl" role="img" aria-hidden="true">
                 {allergen.icon}
               </span>

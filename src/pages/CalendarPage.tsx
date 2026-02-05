@@ -134,7 +134,7 @@ export function CalendarPage() {
                           key={allergen.id}
                           className="inline-flex items-center gap-1 px-2 py-1 bg-white rounded-full text-sm border"
                         >
-                          <span>{allergen.icon}</span>
+                          {allergen.icon && typeof allergen.icon === 'string' && <span>{allergen.icon}</span>}
                           <span>{allergen.name}</span>
                         </span>
                       ))}

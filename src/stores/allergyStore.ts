@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { db, id, seedAllergens } from '../lib/instant';
 import type { Allergen, FoodTrial, Reaction, AllergenStatus } from '../types';
 import { BIG_9_ALLERGENS, ALLERGEN_SUB_ITEMS } from '../types';
@@ -168,16 +169,16 @@ export function useAllergyStore() {
     return foodTrials.filter((t) => t.allergenIds.includes(allergenId)).length;
   };
 
-  // Hierarchy helpers
-  const getParentAllergens = () => {
+  // Hierarchy helpers (stable references to avoid unnecessary re-renders and update loops)
+  const getParentAllergens = useCallback(() => {
     const parents = allergens.filter((a) => !a.parentId);
     if (parents.length === 0 && !isLoading) {
       return BIG_9_ALLERGENS;
     }
     return parents;
-  };
+  }, [allergens, isLoading]);
 
-  const getSubItems = (parentId: string) => {
+  const getSubItems = useCallback((parentId: string) => {
     const subs = allergens.filter((a) => a.parentId === parentId);
     if (subs.length === 0 && !isLoading && ALLERGEN_SUB_ITEMS[parentId]) {
       return ALLERGEN_SUB_ITEMS[parentId].map((sub) => ({
@@ -189,7 +190,7 @@ export function useAllergyStore() {
       }));
     }
     return subs;
-  };
+  }, [allergens, isLoading]);
 
   const getParentStatus = (parentId: string): AllergenStatus => {
     const subItems = allergens.filter((a) => a.parentId === parentId);
@@ -226,7 +227,7 @@ export function useAllergyStore() {
     return allergen ? !allergen.parentId : false;
   };
 
-  const getParentForSubItem = (subItemId: string) => {
+  const getParentForSubItem = useCallback((subItemId: string) => {
     const subItem = allergens.find((a) => a.id === subItemId);
     if (subItem?.parentId) {
       return allergens.find((a) => a.id === subItem.parentId);
@@ -240,7 +241,7 @@ export function useAllergyStore() {
       }
     }
     return undefined;
-  };
+  }, [allergens, isLoading]);
 
   return {
     // State

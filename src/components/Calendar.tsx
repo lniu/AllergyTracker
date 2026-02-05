@@ -195,9 +195,9 @@ export function Calendar({ foodTrials, allergens, reactions, onDayClick }: Calen
                     >
                       {hadReaction ? (
                         <AlertTriangle className="w-3 h-3 text-status-reaction" />
-                      ) : (
+                      ) : allergen.icon && typeof allergen.icon === 'string' ? (
                         <span className="text-[10px]">{allergen.icon}</span>
-                      )}
+                      ) : null}
                     </div>
                   ))}
                   {allergenList.length > 4 && (

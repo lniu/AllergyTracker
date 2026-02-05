@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './ui/Button';
-import { Checkbox } from './ui/Checkbox';
 import { useAllergyStore } from '../stores/allergyStore';
 import type { FoodTrial, Allergen } from '../types';
 import { BIG_9_ALLERGENS, ALLERGEN_SUB_ITEMS } from '../types';
@@ -99,7 +98,11 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
       ? `allergens.subItems.${key}`
       : `allergens.${key}`;
     const translated = t(translationKey);
-    return translated === translationKey ? allergen.name : translated;
+    // Ensure we always return a string - t() can return objects for nested keys
+    if (typeof translated === 'string' && translated !== translationKey) {
+      return translated;
+    }
+    return allergen.name;
   };
 
   // Find allergen by ID from database or static constants (fallback)
@@ -200,14 +203,17 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                       )}
                     </button>
                   ) : (
-                    <Checkbox
+                    <input
+                      type="checkbox"
+                      id={`parent-checkbox-${parent.id}`}
                       checked={selectedAllergens.includes(parent.id)}
-                      onCheckedChange={() => handleAllergenToggle(parent.id)}
+                      onChange={() => handleAllergenToggle(parent.id)}
                       aria-describedby={`allergen-${parent.id}-label`}
+                      className="h-5 w-5 shrink-0 rounded border-2 border-gray-300 accent-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     />
                   )}
                   <span id={`allergen-${parent.id}-label`} className="flex items-center gap-2 flex-1">
-                    {parent.icon && <span aria-hidden="true">{parent.icon}</span>}
+                    {parent.icon && typeof parent.icon === 'string' && <span aria-hidden="true">{parent.icon}</span>}
                     <span className="text-sm font-medium">{getAllergenLabel(parent)}</span>
                     {hasSubItems && selectedSubCount > 0 && (
                       <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded-full">
@@ -226,26 +232,33 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                 {hasSubItems && isExpanded && (
                   <div className="border-t bg-gray-50">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3">
-                      {subItems.map((subItem) => (
-                        <div
-                          key={subItem.id}
-                          className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                            selectedAllergens.includes(subItem.id)
-                              ? 'bg-primary-100 border border-primary-300'
-                              : 'bg-white border border-gray-200 hover:border-gray-300'
-                          }`}
-                          onClick={(e) => {
-                            if ((e.target as HTMLElement).closest('button')) return;
-                            handleAllergenToggle(subItem.id);
-                          }}
-                        >
-                          <Checkbox
-                            checked={selectedAllergens.includes(subItem.id)}
-                            onCheckedChange={() => handleAllergenToggle(subItem.id)}
-                          />
-                          <span className="text-sm truncate">{getAllergenLabel(subItem)}</span>
-                        </div>
-                      ))}
+                      {subItems.map((subItem) => {
+                        const checkboxId = `subitem-checkbox-${subItem.id}`;
+                        const isSelected = selectedAllergens.includes(subItem.id);
+                        return (
+                          <label
+                            key={subItem.id}
+                            htmlFor={checkboxId}
+                            className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                              isSelected
+                                ? 'bg-primary-100 border border-primary-300'
+                                : 'bg-white border border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              id={checkboxId}
+                              checked={isSelected}
+                              onChange={() => handleAllergenToggle(subItem.id)}
+                              aria-describedby={`${checkboxId}-label`}
+                              className="h-5 w-5 shrink-0 rounded border-2 border-gray-300 accent-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            />
+                            <span id={`${checkboxId}-label`} className="text-sm truncate">
+                              {getAllergenLabel(subItem)}
+                            </span>
+                          </label>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -269,7 +282,9 @@ export function FoodTrialForm({ onSuccess, preselectedAllergenId }: FoodTrialFor
                   key={id}
                   className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 rounded-full text-sm"
                 >
-                  {parent && <span className="text-primary-500">{parent.icon}</span>}
+                  {parent?.icon && typeof parent.icon === 'string' && (
+                  <span className="text-primary-500">{parent.icon}</span>
+                )}
                   {getAllergenLabel(allergen!)}
                   <button
                     type="button"
